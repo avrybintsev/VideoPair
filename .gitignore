@@ -1,0 +1,14 @@
+requirements.txt
+
+*.egg-info/
+build/
+dist/
+*.pyc
+*iml
+.idea
+.project
+.pydevproject
+*.cfg
+.DS_STORE
+djdb.sqlite
+venv/

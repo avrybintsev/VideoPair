@@ -16,10 +16,12 @@
 </head>
 
 <body>
-    {% if participant %}
-        {{ participant.name }}
+    {% if question %}
+        {{ question.sequence }}
+        {{ question.left }}
+        {{ question.right }}
     {% else %}
-        Form for new Participant
+        All Questions Answered
     {% endif %}
 </body>
 </html>

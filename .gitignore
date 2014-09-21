@@ -10,5 +10,5 @@ dist/
 .pydevproject
 *.cfg
 .DS_STORE
-djdb.sqlite
+*.sqlite
 venv/

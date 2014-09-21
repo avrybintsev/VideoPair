@@ -33,18 +33,18 @@ class Method(models.Model):
 class Pair(models.Model):
     left = models.ForeignKey(Method, related_name='left_method', verbose_name=u'Первый метод')
     right = models.ForeignKey(Method, related_name='right_method', verbose_name=u'Второй метод')
-    sequence = models.ForeignKey(Sequence, verbose_name=u'Последовательность')
 
     def __repr__(self):
-        return '{} vs {} [{}]'.format(self.left, self.right, self.sequence)
+        return '{} vs {}'.format(self.left, self.right)
 
     def __unicode__(self):
-        return unicode(u'{} vs {} [{}]'.format(self.left, self.right, self.sequence))
+        return unicode(u'{} vs {}'.format(self.left, self.right))
 
 
 class Participant(models.Model):
     name = models.CharField(max_length=200, verbose_name=u'Имя')
-    email = models.EmailField(max_length=200, verbose_name=u'EMail')
+    email = models.EmailField(max_length=200, blank=True, verbose_name=u'EMail')
+    date = models.DateTimeField(verbose_name=u'Дата')
     ip = models.CharField(max_length=16, verbose_name=u'IP address')
     ua = models.TextField(verbose_name=u'User-Agent')
 

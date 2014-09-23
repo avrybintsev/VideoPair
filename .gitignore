@@ -1,6 +1,3 @@
-requirements.txt
-Fixtures/example.json
-
 *.egg-info/
 build/
 dist/
@@ -12,4 +9,5 @@ dist/
 *.cfg
 .DS_STORE
 *.sqlite
+*.sqlite3
 venv/

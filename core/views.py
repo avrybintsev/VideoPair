@@ -18,8 +18,6 @@ def index(request, template_name='core/index.html'):
     participant_id = request.session.get('participant_id')
     participant = get_or_none(Participant, pk=participant_id)
 
-    questions = Question.objects.filter(participant=participant)
-
     if request.method == 'POST':
         participant_form = ParticipantForm(request.POST)
 
@@ -47,11 +45,14 @@ def index(request, template_name='core/index.html'):
 
             return redirect(reverse('core.views.ask'))
 
+    questions = Question.objects.filter(participant=participant, answered=False)
+    if questions:
+        return redirect('core.views.ask')
+
     participant_form = ParticipantForm()
 
     return render(request, template_name, {
         'participant': participant,
-        'questions': questions,
         'participant_form': participant_form,
     })
 
@@ -83,6 +84,9 @@ def ask(request, template_name='core/ask.html'):
         initial={'better': question.left, 'worse': question.right, 'question': question}) if question else None
     answer_right_form = AnswerForm(
         initial={'better': question.right, 'worse': question.left, 'question': question}) if question else None
+
+    if question is None:
+        return redirect(reverse('core.views.index'))
 
     return render(request, template_name, {
         'participant': participant,

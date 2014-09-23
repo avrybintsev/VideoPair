@@ -17,7 +17,7 @@
 
 <body>
     {% if participant %}
-        {{ participant.name }}
+        {{ participant.name }}, вы ответили на все вопросы, спасибо!
     {% else %}
         <form method="post">
             {% csrf_token %}

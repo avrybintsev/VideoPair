@@ -31,8 +31,8 @@ class Method(models.Model):
 
 
 class Pair(models.Model):
-    left = models.ForeignKey(Method, related_name='left_method', verbose_name=u'Первый метод')
-    right = models.ForeignKey(Method, related_name='right_method', verbose_name=u'Второй метод')
+    left = models.ForeignKey(Method, related_name='pair_left_method', verbose_name=u'Первый метод')
+    right = models.ForeignKey(Method, related_name='pair_right_method', verbose_name=u'Второй метод')
 
     def __repr__(self):
         return '{} vs {}'.format(self.left, self.right)
@@ -44,7 +44,7 @@ class Pair(models.Model):
 class Participant(models.Model):
     name = models.CharField(max_length=200, verbose_name=u'Имя')
     email = models.EmailField(max_length=200, blank=True, verbose_name=u'EMail')
-    date = models.DateTimeField(verbose_name=u'Дата')
+    date = models.DateTimeField(auto_now_add=True, verbose_name=u'Дата')
     ip = models.CharField(max_length=16, verbose_name=u'IP address')
     ua = models.TextField(verbose_name=u'User-Agent')
 
@@ -55,15 +55,28 @@ class Participant(models.Model):
         return unicode(self.name)
 
 
-class Answer(models.Model):
-    participant = models.ForeignKey(Participant, verbose_name=u'Участник')
-    date = models.DateTimeField(verbose_name=u'Дата')
+class Question(models.Model):
+    left = models.ForeignKey(Method, related_name='question_left_method', verbose_name=u'Первый метод')
+    right = models.ForeignKey(Method, related_name='question_right_method', verbose_name=u'Второй метод')
     sequence = models.ForeignKey(Sequence, verbose_name=u'Последовательность')
+    participant = models.ForeignKey(Participant, verbose_name=u'Участник')
+    answered = models.BooleanField(verbose_name=u'Есть ответ')
+
+    def __repr__(self):
+        return '{} vs {} [{}] <{}>'.format(self.left, self.right, self.sequence, self.participant)
+
+    def __unicode__(self):
+        return unicode(u'{} vs {} [{}] <{}>'.format(self.left, self.right, self.sequence, self.participant))
+
+
+class Answer(models.Model):
+    date = models.DateTimeField(auto_now_add=True, verbose_name=u'Дата')
+    question = models.ForeignKey(Question, verbose_name=u'Вопрос')
     better = models.ForeignKey(Method, related_name='better_method', verbose_name=u'Лучший')
     worse = models.ForeignKey(Method, related_name='worse_method', verbose_name=u'Худший')
 
     def __repr__(self):
-        return '{} > {} [{}] [{}]'.format(self.better, self.worse, self.sequence, self.participant)
+        return '{}! {}'.format(self.better, self.question)
 
     def __unicode__(self):
-        return unicode(u'{} > {} [{}] [{}]'.format(self.better, self.worse, self.sequence, self.participant))
+        return unicode(u'{}! {}'.format(self.better, self.question))

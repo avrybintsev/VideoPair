@@ -17,9 +17,39 @@
 
 <body>
     {% if question %}
-        {{ question.sequence }}
-        {{ question.left }}
-        {{ question.right }}
+        <table>
+            <tbody>
+                <tr>
+                    <td>
+                        {{ question.sequence }}
+                        {{ question.left }}
+                    </td>
+                    <td>
+                        {{ question.sequence }}
+                        {{ question.right }}
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <form method="post">
+                            {% csrf_token %}
+                            {{ answer_left_form }}
+                            <input type="submit">
+                        </form>
+                    </td>
+                    <td>
+                        <form method="post">
+                            {% csrf_token %}
+                            {{ answer_right_form }}
+                            <input type="submit">
+                        </form>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+        <div>
+            Question #{{ counter.current }} of {{ counter.total }}
+        </div>
     {% else %}
         All Questions Answered
     {% endif %}

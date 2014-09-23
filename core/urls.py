@@ -4,5 +4,5 @@ urlpatterns = patterns('core.views',
     url(r'^$', 'index'),
     url(r'^ask', 'ask'),
     url(r'^cp', 'cp'),
-    url(r'^arp', 'arp')
+    url(r'^generate/(?P<number>\d{1,4})', 'generate')
 )

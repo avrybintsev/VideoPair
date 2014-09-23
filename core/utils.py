@@ -12,3 +12,11 @@ def get_client_ip(request):
 
 def get_client_ua(request):
     return request.META.get('HTTP_USER_AGENT')
+
+
+def get_or_none(model, **kwargs):
+    objects = model.objects.filter(**kwargs)
+    if len(objects) > 0:
+        return objects[0]
+    else:
+        return None

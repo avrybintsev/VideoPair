@@ -16,10 +16,40 @@
 </head>
 
 <body>
-{% if participant %}
-    {{ participant.name }}
-{% else %}
-    Form for new Participant
-{% endif %}
+    <h1>Статистика упоминания методов</h1>
+    <table>
+        <thead>
+            <th>Метод</th>
+            <th>В вопросах</th>
+            <th>В парах</th>
+            <th>Всего</th>
+        </thead>
+        <tbody>
+            {% for item in stats %}
+                <tr>
+                    <td>{{ item.method }}</td>
+                    <td>{{ item.history }}</td>
+                    <td>{{ item.future }}</td>
+                    <td>{{ item.future|add:item.history }}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <h1>Голосов за метод</h1>
+    <table>
+        <thead>
+            <th>Метод</th>
+            <th>Голосов</th>
+        </thead>
+        <tbody>
+            {% for item in best %}
+                <tr>
+                    <td>{{ item.method }}</td>
+                    <td>{{ item.votes }}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
 </body>
 </html>

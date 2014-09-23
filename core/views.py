@@ -10,16 +10,15 @@ from django.http import HttpResponseBadRequest, HttpResponseForbidden
 from django.shortcuts import render, redirect
 
 from core.forms import AnswerForm, ParticipantForm, PairForm
-from core.models import Pair, Sequence, Method, Participant, Answer
-from core.utils import get_client_ip, get_client_ua
+from core.models import Pair, Sequence, Method, Participant, Answer, Question
+from core.utils import get_client_ip, get_client_ua, get_or_none
 
-
-Question = namedtuple('Question', ('sequence', 'left', 'right', 'answered'))
 
 def index(request, template_name='core/index.html'):
+    participant_id = request.session.get('participant_id')
+    participant = get_or_none(Participant, pk=participant_id)
 
-    participant = request.session.get('participant')
-    questions = request.session.get('questions')
+    questions = Question.objects.filter(participant=participant)
 
     if request.method == 'POST':
         participant_form = ParticipantForm(request.POST)
@@ -28,20 +27,25 @@ def index(request, template_name='core/index.html'):
             participant = participant_form.save(commit=False)
             participant.ip = get_client_ip(request),
             participant.ua = get_client_ua(request),
-            participant.date = datetime.datetime.now(),
             participant.save()
 
             sequences = Sequence.objects.all()
             pairs = Pair.objects.all()[:len(sequences)]
-            questions = [Question(sequence, pair.left, pair.right, False) for sequence, pair in zip(sequences, pairs)]
-            pairs.delete()
 
-            request.session['participant'] = participant
-            request.session['questions'] = questions
+            for sequence, pair in zip(sequences, pairs):
+                question = Question(
+                    participant=participant,
+                    left=pair.left,
+                    right=pair.right,
+                    sequence=sequence,
+                    answered=False
+                )
+                question.save()
+                pair.delete()
 
-            return redirect(reverse('ask'))
-        else:
-            return HttpResponseBadRequest()
+            request.session['participant_id'] = participant.id
+
+            return redirect(reverse('core.views.ask'))
 
     participant_form = ParticipantForm()
 
@@ -53,13 +57,10 @@ def index(request, template_name='core/index.html'):
 
 
 def ask(request, template_name='core/ask.html'):
-    participant = request.session.get('participant')
-    questions = request.session.get('questions')
+    participant_id = request.session.get('participant_id')
+    participant = get_or_none(Participant, pk=participant_id)
 
-    answered = len(filter(lambda x: x.answered, questions))
-    question = (x for x in questions if not x.answered).next()
-
-    if not (participant and questions):
+    if not participant:
         return HttpResponseForbidden()
 
     if request.method == 'POST':
@@ -67,20 +68,31 @@ def ask(request, template_name='core/ask.html'):
 
         if answer_form.is_valid():
             answer = answer_form.save(commit=False)
-            answer.date = datetime.datetime.now()
-            answer.participant = participant
             answer.save()
 
-            question.answered = True
+            answer.question.answered = True
+            answer.question.save()
 
-    answer_form = AnswerForm(initial={'sequence': question.sequence})
+            return redirect(reverse('core.views.ask'))
+
+    total = Sequence.objects.all().count()
+    questions = Question.objects.filter(participant=participant, answered=False)
+    question = questions[0] if questions else None
+
+    answer_left_form = AnswerForm(
+        initial={'better': question.left, 'worse': question.right, 'question': question}) if question else None
+    answer_right_form = AnswerForm(
+        initial={'better': question.right, 'worse': question.left, 'question': question}) if question else None
 
     return render(request, template_name, {
         'participant': participant,
-        'questions': questions,
-        'answered': answered,
+        'counter': {
+            'total': total,
+            'current': total - len(questions) + 1,
+        },
         'question': question,
-        'answer_form': answer_form,
+        'answer_left_form': answer_left_form,
+        'answer_right_form': answer_right_form,
     })
 
 
@@ -89,12 +101,19 @@ def cp(request, template_name='core/cp.html'):
     sequences = Sequence.objects.all()
     methods = Method.objects.all()
     pairs = Pair.objects.all()
+    questions = Question.objects.all()
     answers = Answer.objects.all()
     participants = Participant.objects.all()
 
     stats = [{
-        'history': answers.filter(Q(better=method) | Q(worse=method)).count(),
+        'method': method,
+        'history': questions.filter(Q(left=method) | Q(right=method)).count(),
         'future': pairs.filter(Q(left=method) | Q(right=method)).count(),
+    } for method in methods]
+
+    best = [{
+        'method': method,
+        'votes': answers.filter(better=method).count(),
     } for method in methods]
 
     if request.method == 'POST':
@@ -109,17 +128,18 @@ def cp(request, template_name='core/cp.html'):
         'sequences': sequences,
         'methods': methods,
         'pairs': pairs,
+        'questions': questions,
         'answers': answers,
         'participants': participants,
         'stats': stats,
+        'best': best,
     })
 
 
 @staff_member_required
-def arp(request):
+def generate(request, number):
     methods = Method.objects.all()
-    sequences = Sequence.objects.all()
-    for _ in xrange(len(sequences)):
+    for _ in xrange(int(number)):
         random2 = random.sample(methods, 2)
         pair = Pair(left=random2[0], right=random2[1])
         pair.save()

@@ -19,7 +19,11 @@
     {% if participant %}
         {{ participant.name }}
     {% else %}
-        Form for new Participant
+        <form method="post">
+            {% csrf_token %}
+            {{ participant_form }}
+            <input type="submit">
+        </form>
     {% endif %}
 </body>
 </html>

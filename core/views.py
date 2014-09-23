@@ -2,14 +2,15 @@
 import datetime
 import random
 from collections import namedtuple
-from django.contrib.admin.views.decorators import staff_member_required
 
+from django.contrib.admin.views.decorators import staff_member_required
 from django.core.urlresolvers import reverse
+from django.db.models import Q
 from django.http import HttpResponseBadRequest, HttpResponseForbidden
 from django.shortcuts import render, redirect
 
-from core.forms import AnswerForm, ParticipantForm
-from core.models import Pair, Sequence, Method
+from core.forms import AnswerForm, ParticipantForm, PairForm
+from core.models import Pair, Sequence, Method, Participant, Answer
 from core.utils import get_client_ip, get_client_ua
 
 
@@ -42,11 +43,12 @@ def index(request, template_name='core/index.html'):
         else:
             return HttpResponseBadRequest()
 
-
+    participant_form = ParticipantForm()
 
     return render(request, template_name, {
         'participant': participant,
         'questions': questions,
+        'participant_form': participant_form,
     })
 
 
@@ -71,11 +73,45 @@ def ask(request, template_name='core/ask.html'):
 
             question.answered = True
 
+    answer_form = AnswerForm(initial={'sequence': question.sequence})
+
     return render(request, template_name, {
         'participant': participant,
         'questions': questions,
         'answered': answered,
         'question': question,
+        'answer_form': answer_form,
+    })
+
+
+@staff_member_required
+def cp(request, template_name='core/cp.html'):
+    sequences = Sequence.objects.all()
+    methods = Method.objects.all()
+    pairs = Pair.objects.all()
+    answers = Answer.objects.all()
+    participants = Participant.objects.all()
+
+    stats = [{
+        'history': answers.filter(Q(better=method) | Q(worse=method)).count(),
+        'future': pairs.filter(Q(left=method) | Q(right=method)).count(),
+    } for method in methods]
+
+    if request.method == 'POST':
+        pair_form = PairForm(request.POST)
+
+        if pair_form.is_valid():
+            pair = pair_form.save(commit=False)
+            # check for left != right ?
+            pair.save()
+
+    return render(request, template_name, {
+        'sequences': sequences,
+        'methods': methods,
+        'pairs': pairs,
+        'answers': answers,
+        'participants': participants,
+        'stats': stats,
     })
 
 
@@ -87,4 +123,4 @@ def arp(request):
         random2 = random.sample(methods, 2)
         pair = Pair(left=random2[0], right=random2[1])
         pair.save()
-    return redirect(reverse('index'))
+    return redirect(reverse('core.views.index'))

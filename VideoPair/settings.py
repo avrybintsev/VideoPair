@@ -86,6 +86,8 @@ USE_TZ = True
 # Example: "/home/media/media.lawrence.com/static/"
 STATIC_ROOT = ''
 
+STATIC_URL = '/static/'
+
 # Additional locations of static files
 STATICFILES_DIRS = (
     os.path.join(PROJECT_PATH, 'static'),

@@ -2,7 +2,7 @@
 from django.forms import ModelForm, Textarea, TextInput, HiddenInput
 
 # Extended ModelForm
-from core.models import Participant, Answer
+from core.models import Participant, Answer, Pair
 
 
 class ExtendedMetaModelForm(ModelForm):
@@ -65,5 +65,23 @@ class AnswerForm(ExtendedMetaModelForm):
     class Meta:
         model = Answer
         fields = ('better', 'worse', 'sequence')
+
+        field_args = {
+            'better': {
+                'widget': HiddenInput(),
+            },
+            'worse': {
+                'widget': HiddenInput(),
+            },
+            'sequence': {
+                'widget': HiddenInput(),
+            }
+        }
+
+
+class PairForm(ExtendedMetaModelForm):
+    class Meta:
+        model = Pair
+        fields = ('left', 'right')
 
         #

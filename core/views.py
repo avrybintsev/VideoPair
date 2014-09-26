@@ -5,10 +5,16 @@ from django.core.urlresolvers import reverse
 from django.db.models import Q
 from django.http import HttpResponseForbidden, HttpResponse
 from django.shortcuts import render, redirect
+from django.template.defaultfilters import register
 
 from core.forms import AnswerForm, ParticipantForm, PairForm
 from core.models import Pair, Sequence, Method, Participant, Answer, Question
 from core.utils import get_client_ip, get_client_ua, get_or_none, generate_pairs
+
+
+@register.filter
+def average(sum, n):
+    return (sum+0.0) / n if n else 0
 
 
 def index(request, template_name='core/index.html'):
@@ -110,12 +116,20 @@ def ask(request, template_name='core/ask.html'):
 
 @staff_member_required
 def cp(request, template_name='core/cp.html'):
-    sequences = Sequence.objects.all()
+
+    if request.method == 'POST':
+        pair_form = PairForm(request.POST)
+
+        if pair_form.is_valid():
+            pair = pair_form.save(commit=False)
+            pair.save()
+
+    page = request.GET.get('page', 1)
+
     methods = Method.objects.all()
     pairs = Pair.objects.all()
     questions = Question.objects.all()
     answers = Answer.objects.all()
-    participants = Participant.objects.all()
 
     stats = [{
         'method': method,
@@ -129,21 +143,9 @@ def cp(request, template_name='core/cp.html'):
         'count': questions.filter(Q(answered=True), Q(left=method) | Q(right=method)).count(),
     } for method in methods]
 
-    if request.method == 'POST':
-        pair_form = PairForm(request.POST)
-
-        if pair_form.is_valid():
-            pair = pair_form.save(commit=False)
-            # check for left != right ?
-            pair.save()
-
     return render(request, template_name, {
-        'sequences': sequences,
-        'methods': methods,
-        'pairs': pairs,
-        'questions': questions,
-        'answers': answers,
-        'participants': participants,
+        'e_methods_h': list(enumerate(methods)),
+        'e_methods_v': list(enumerate(methods)),
         'stats': stats,
         'scores': scores,
     })

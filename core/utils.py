@@ -1,5 +1,11 @@
 # -*- coding: utf-8 -*-
 import random
+import threading
+
+from django.core.mail import EmailMessage
+from django.template import loader, Context
+
+from VideoPair import settings
 from core.models import Method, Pair
 
 
@@ -30,3 +36,21 @@ def generate_pairs(number):
         random2 = random.sample(methods, 2)
         pair = Pair(left=random2[0], right=random2[1])
         pair.save()
+
+
+class EmailThread(threading.Thread):
+    def __init__(self, subject, content, recipient_list):
+        self.subject = subject
+        self.recipient_list = recipient_list
+        self.content = content
+        threading.Thread.__init__(self)
+
+    def run(self):
+        msg = EmailMessage(self.subject, self.content, settings.EMAIL_HOST_USER, self.recipient_list)
+        msg.content_subtype = "html"
+        msg.send(fail_silently=False)
+
+
+def send_email(applicant, template='email/default.html', context=None):
+    template = loader.get_template(template)
+    EmailThread(u'Школа Программистов HeadHunter', template.render(Context(context)), [applicant.email]).start()

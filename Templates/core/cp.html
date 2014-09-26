@@ -16,6 +16,9 @@
 </head>
 
 <body>
+    <h1>Статистика</h1>
+    <a href="{% url 'core.views.csv' %}">Все ответы в .csv</a>
+
     <h1>Статистика упоминания методов</h1>
     <table>
         <thead>
@@ -36,6 +39,35 @@
         </tbody>
     </table>
 
+    <h1>Добавление пар</h1>
+    <table>
+        <tbody>
+            <tr>
+                <td></td>
+                {% for i, method_v in e_methods_h %}
+                    <td>{{ method_v.short_name }}</td>
+                {% endfor %}
+            </tr>
+            {% for i, method_h in e_methods_h %}
+                <tr>
+                    <td>{{ method_h.short_name }}</td>
+                    {% for j, method_v in e_methods_v %}
+                        <td>
+                            {% if j > i %}
+                                <form method="post">
+                                    {% csrf_token %}
+                                    <input type="hidden" value="{{ method_h.id }}" name="left">
+                                    <input type="hidden" value="{{ method_v.id }}" name="right">
+                                    <input type="submit" value="">
+                                </form>
+                            {% endif %}
+                        </td>
+                    {% endfor %}
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
     <h1>Голосов за метод</h1>
     <table>
         <thead>
@@ -50,10 +82,12 @@
                     <td>{{ item.method }}</td>
                     <td>{{ item.score }}</td>
                     <td>{{ item.count }}</td>
-                    <td></td>
+                    <td>{{ item.score|average:item.count }}</td>
                 </tr>
             {% endfor %}
         </tbody>
     </table>
+
+
 </body>
 </html>

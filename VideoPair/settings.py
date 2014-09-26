@@ -133,3 +133,11 @@ SESSION_COOKIE_AGE = 5 * 24 * 60 * 60
 FIXTURE_DIRS = (
     './Fixtures/',
 )
+
+ITEMS_ON_PAGE = 25
+
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = '587'
+EMAIL_HOST_USER = '@gmail.com' # account
+EMAIL_HOST_PASSWORD = '' # password
+EMAIL_USE_TLS = True

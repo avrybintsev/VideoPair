@@ -64,13 +64,10 @@ class ParticipantForm(ExtendedMetaModelForm):
 class AnswerForm(ExtendedMetaModelForm):
     class Meta:
         model = Answer
-        fields = ('better', 'worse', 'question')
+        fields = ('best', 'question')
 
         field_args = {
-            'better': {
-                'widget': HiddenInput(),
-            },
-            'worse': {
+            'best': {
                 'widget': HiddenInput(),
             },
             'question': {

@@ -40,13 +40,17 @@
     <table>
         <thead>
             <th>Метод</th>
-            <th>Голосов</th>
+            <th>Счёт</th>
+            <th>Количество участий</th>
+            <th>Средний счёт</th>
         </thead>
         <tbody>
-            {% for item in best %}
+            {% for item in scores %}
                 <tr>
                     <td>{{ item.method }}</td>
-                    <td>{{ item.votes }}</td>
+                    <td>{{ item.score }}</td>
+                    <td>{{ item.count }}</td>
+                    <td></td>
                 </tr>
             {% endfor %}
         </tbody>

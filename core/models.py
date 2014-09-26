@@ -62,6 +62,9 @@ class Question(models.Model):
     participant = models.ForeignKey(Participant, verbose_name=u'Участник')
     answered = models.BooleanField(verbose_name=u'Есть ответ')
 
+    def has_method(self, method):
+        return self.right == method or self.left == method
+
     def __repr__(self):
         return '{} vs {} [{}] <{}>'.format(self.left, self.right, self.sequence, self.participant)
 
@@ -72,11 +75,40 @@ class Question(models.Model):
 class Answer(models.Model):
     date = models.DateTimeField(auto_now_add=True, verbose_name=u'Дата')
     question = models.ForeignKey(Question, verbose_name=u'Вопрос')
-    better = models.ForeignKey(Method, related_name='better_method', verbose_name=u'Лучший')
-    worse = models.ForeignKey(Method, related_name='worse_method', verbose_name=u'Худший')
+    best = models.ForeignKey(Method, blank=True, null=True, related_name='best_method', verbose_name=u'Лучший')
+
+    def get_worst(self):
+        if self.best is None:
+            return None
+        if self.question.left == self.best:
+            return self.question.right
+        return self.question.left
+
+    def get_letter(self):
+        if self.best == self.question.left:
+            return 'F'
+        elif self.best == self.question.right:
+            return 'S'
+        return 'N'
+
+    def get_score(self, method):
+        if self.best == method:
+            return 1
+        elif self.best is None and self.question.has_method(method):
+            return 0.5
+        return 0
+
+    def get_string(self):
+        return u'{},{},{},{},{}'.format(
+            self.question.sequence.name,
+            self.question.left.short_name,
+            self.question.right.short_name,
+            self.get_letter(),
+            self.question.participant.email
+        )
 
     def __repr__(self):
-        return '{}! {}'.format(self.better, self.question)
+        return '{}! {}'.format(self.best, self.question)
 
     def __unicode__(self):
-        return unicode(u'{}! {}'.format(self.better, self.question))
+        return unicode(u'{}! {}'.format(self.best, self.question))

@@ -45,6 +45,15 @@
                         </form>
                     </td>
                 </tr>
+                <tr>
+                   <td colspan="2">
+                       <form method="post">
+                           {% csrf_token %}
+                           {{ answer_none_form }}
+                           <input type="submit">
+                       </form>
+                   </td>
+                </tr>
             </tbody>
         </table>
         <div>

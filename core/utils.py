@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+import random
+from core.models import Method, Pair
 
 
 def get_client_ip(request):
@@ -20,3 +22,11 @@ def get_or_none(model, **kwargs):
         return objects[0]
     else:
         return None
+
+
+def generate_pairs(number):
+    methods = Method.objects.all()
+    for _ in xrange(int(number)):
+        random2 = random.sample(methods, 2)
+        pair = Pair(left=random2[0], right=random2[1])
+        pair.save()

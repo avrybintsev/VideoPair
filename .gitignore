@@ -11,3 +11,4 @@ dist/
 *.sqlite
 *.sqlite3
 venv/
+example.json

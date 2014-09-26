@@ -4,5 +4,6 @@ urlpatterns = patterns('core.views',
     url(r'^$', 'index'),
     url(r'^ask', 'ask'),
     url(r'^cp', 'cp'),
-    url(r'^generate/(?P<number>\d{1,4})', 'generate')
+    url(r'^csv', 'csv'),
+    url(r'^gen/(?P<number>\d{1,4})', 'generate')
 )

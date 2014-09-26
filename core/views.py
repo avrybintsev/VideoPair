@@ -1,17 +1,14 @@
 # -*- coding: utf-8 -*-
-import datetime
-import random
-from collections import namedtuple
 
 from django.contrib.admin.views.decorators import staff_member_required
 from django.core.urlresolvers import reverse
 from django.db.models import Q
-from django.http import HttpResponseBadRequest, HttpResponseForbidden
+from django.http import HttpResponseForbidden, HttpResponse
 from django.shortcuts import render, redirect
 
 from core.forms import AnswerForm, ParticipantForm, PairForm
 from core.models import Pair, Sequence, Method, Participant, Answer, Question
-from core.utils import get_client_ip, get_client_ua, get_or_none
+from core.utils import get_client_ip, get_client_ua, get_or_none, generate_pairs
 
 
 def index(request, template_name='core/index.html'):
@@ -28,7 +25,14 @@ def index(request, template_name='core/index.html'):
             participant.save()
 
             sequences = Sequence.objects.all()
-            pairs = Pair.objects.all()[:len(sequences)]
+            pairs = Pair.objects.all()
+
+            if len(sequences) > len(pairs):
+                generate_pairs(len(sequences) - len(pairs) + 1)
+                pairs = Pair.objects.all()
+                # send email !
+
+            pairs = pairs[:len(sequences)]
 
             for sequence, pair in zip(sequences, pairs):
                 question = Question(
@@ -81,9 +85,12 @@ def ask(request, template_name='core/ask.html'):
     question = questions[0] if questions else None
 
     answer_left_form = AnswerForm(
-        initial={'better': question.left, 'worse': question.right, 'question': question}) if question else None
+        initial={'best': question.left, 'question': question}) if question else None
     answer_right_form = AnswerForm(
-        initial={'better': question.right, 'worse': question.left, 'question': question}) if question else None
+        initial={'best': question.right, 'question': question}) if question else None
+    answer_none_form = AnswerForm(
+        initial={'best': None, 'question': question} if question else None
+    )
 
     if question is None:
         return redirect(reverse('core.views.index'))
@@ -97,6 +104,7 @@ def ask(request, template_name='core/ask.html'):
         'question': question,
         'answer_left_form': answer_left_form,
         'answer_right_form': answer_right_form,
+        'answer_none_form': answer_none_form,
     })
 
 
@@ -115,9 +123,10 @@ def cp(request, template_name='core/cp.html'):
         'future': pairs.filter(Q(left=method) | Q(right=method)).count(),
     } for method in methods]
 
-    best = [{
+    scores = [{
         'method': method,
-        'votes': answers.filter(better=method).count(),
+        'score': sum([answer.get_score(method) for answer in answers]),
+        'count': questions.filter(Q(answered=True), Q(left=method) | Q(right=method)).count(),
     } for method in methods]
 
     if request.method == 'POST':
@@ -136,15 +145,18 @@ def cp(request, template_name='core/cp.html'):
         'answers': answers,
         'participants': participants,
         'stats': stats,
-        'best': best,
+        'scores': scores,
     })
 
 
 @staff_member_required
+def csv(request):
+    answers = Answer.objects.all()
+    content = '\n'.join([answer.get_string() for answer in answers])
+    return HttpResponse(content, content_type='text/csv')
+
+
+@staff_member_required
 def generate(request, number):
-    methods = Method.objects.all()
-    for _ in xrange(int(number)):
-        random2 = random.sample(methods, 2)
-        pair = Pair(left=random2[0], right=random2[1])
-        pair.save()
-    return redirect(reverse('core.views.index'))
+    generate_pairs(number)
+    return redirect(reverse('core.views.cp'))

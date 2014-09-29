@@ -141,3 +141,5 @@ EMAIL_PORT = '587'
 EMAIL_HOST_USER = '@gmail.com' # account
 EMAIL_HOST_PASSWORD = '' # password
 EMAIL_USE_TLS = True
+
+ALERT_EMAIL = '@' # email for alerts

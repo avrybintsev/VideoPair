@@ -51,6 +51,6 @@ class EmailThread(threading.Thread):
         msg.send(fail_silently=False)
 
 
-def send_email(applicant, template='email/default.html', context=None):
+def send_email(address=settings.ALERT_EMAIL, template='email/default.html', context=None):
     template = loader.get_template(template)
-    EmailThread(u'Школа Программистов HeadHunter', template.render(Context(context)), [applicant.email]).start()
+    EmailThread(u'VideoPair', template.render(Context(context)), [address]).start()

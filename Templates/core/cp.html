@@ -16,8 +16,12 @@
 </head>
 
 <body>
-    <h1>Статистика</h1>
-    <a href="{% url 'core.views.csv' %}">Все ответы в .csv</a>
+    <h1>Управление</h1>
+    <uL>        
+        <li><i class="icon-user icon-white"></i> {{ request.user }}</li>
+        <li><a href="{% url 'admin:index' %}">Админка Джанго</a></li>
+        <li><a href="{% url 'core.views.csv' %}">Все ответы в .csv</a></li>
+    </ul>
 
     <h1>Статистика упоминания методов</h1>
     <table>

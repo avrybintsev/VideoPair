@@ -18,6 +18,7 @@
 <body>
     {% if participant %}
         {{ participant.name }}, вы ответили на все вопросы, спасибо!
+        <a href="{% url 'core.views.invalidate' %}">Новый участник</a>
     {% else %}
         <form method="post">
             {% csrf_token %}

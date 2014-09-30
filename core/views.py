@@ -36,7 +36,7 @@ def index(request, template_name='core/index.html'):
             if len(sequences) > len(pairs):
                 generate_pairs(len(sequences) - len(pairs) + 1)
                 pairs = Pair.objects.all()
-                # send email !
+                send_email(template='email/pairs_empty.html')
 
             pairs = pairs[:len(sequences)]
 
@@ -113,6 +113,10 @@ def ask(request, template_name='core/ask.html'):
         'answer_none_form': answer_none_form,
     })
 
+
+def invalidate(request):
+    del request.session['participant_id']
+    return redirect(reverse('core.views.index'))
 
 @staff_member_required
 def cp(request, template_name='core/cp.html'):

@@ -3,12 +3,11 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
+    <title>VideoPair</title>
 
-    <title>The HTML5 Herald</title>
-    <meta name="description" content="The HTML5 Herald">
-    <meta name="author" content="SitePoint">
-
-    <link rel="stylesheet" href="css/styles.css?v=1.0">
+    <script src="{{ STATIC_URL }}js/jquery-1.11.1.min.js"></script>
+    <script src="{{ STATIC_URL }}js/bootstrap.min.js"></script>
+    <script src="{{ STATIC_URL }}js/popcorn.min.js"></script>
 
     <!--[if lt IE 9]>
     <script src="http://html5shiv.googlecode.com/svn/trunk/html5.js"></script>
@@ -22,23 +21,28 @@
             <tbody>
                 <tr>
                     <td colspan="2" align="center">
+                        {{ participant.name }}
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="2" align="center">
                         Вопрос #{{ counter.current }} из {{ counter.total }}
                     </td>
                 </tr>
                 <tr>
                     <td>
-                        <video width="320" height="240">
-                            <source src="{{ video_path }}/{{ question.sequence.name }}/{{ question.left.short_name }}.mp4" type="video/mp4">
-                            <source src="{{ video_path }}/{{ question.sequence.name }}/{{ question.left.short_name }}.webm" type="video/webm">
-                            К сожалению, ваш браузер не поддерживает воспроизведение видео :(
-                        </video>
+                        <video width="320" height="240" id="player-video-left"></video>
                     </td>
                     <td>
-                        <video width="320" height="240">
-                            <source src="{{ video_path }}/{{ question.sequence.name }}/{{ question.right.short_name }}.mp4" type="video/mp4">
-                            <source src="{{ video_path }}/{{ question.sequence.name }}/{{ question.right.short_name }}.webm" type="video/webm">
-                            К сожалению, ваш браузер не поддерживает воспроизведение видео :(
-                        </video>
+                        <video width="320" height="240" id="player-video-right"></video>
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="2">
+                        <button id="player-controls-play"><span class=""></span>Play</button>
+                        <button id="player-controls-pause"><span class=""></span>Pause</button>
+                        <input type="range" value="0" id="player-controls-scrub" />
+                        <span class="player-preloader">Видео загружается...</span>
                     </td>
                 </tr>
                 <tr>
@@ -69,6 +73,129 @@
             </tbody>
         </table>
         </div>
+
+        <script>
+            window.requestAnimFrame = function(){
+                return (
+                        window.requestAnimationFrame       ||
+                                window.webkitRequestAnimationFrame ||
+                                window.mozRequestAnimationFrame    ||
+                                window.oRequestAnimationFrame      ||
+                                window.msRequestAnimationFrame     ||
+                                function(/* function */ callback){
+                                    window.setTimeout(callback, 1000 / 60);
+                                }
+                        );
+            }();
+
+            var paths = {
+                    left: {
+                        mp4: "{{ video_path }}/{{ question.sequence.name }}/{{ question.left.short_name }}.mp4",
+                        webm: "{{ video_path }}/{{ question.sequence.name }}/{{ question.left.short_name }}.webm"
+                    },
+                    right: {
+                        mp4: "{{ video_path }}/{{ question.sequence.name }}/{{ question.right.short_name }}.mp4",
+                        webm: "{{ video_path }}/{{ question.sequence.name }}/{{ question.right.short_name }}.webm"
+                    }
+                },
+                videos = {
+                    left: Popcorn("#player-video-left"),
+                    right: Popcorn("#player-video-right")
+                },
+                videos_el = {
+                    left: $("#player-video-left")[0],
+                    right: $("#player-video-right")[0]
+                },
+                controls = {
+                    preloader: $(".player-preloader"),
+                    scrub: $("#player-controls-scrub"),
+                    play: $("#player-controls-play"),
+                    pause: $("#player-controls-pause")
+                },
+                progress = {},
+                events = "play pause timeupdate seeking".split(/\s+/g);
+
+            events.forEach(function (event) {
+                videos.left.on(event, function () {
+                    if (event === "timeupdate") {
+                        if (!videos.left.paused) {
+                            return;
+                        }
+                        videos.right.emit("timeupdate");
+                        controls.scrub.val(this.currentTime()*10);
+                        return;
+                    }
+
+                    if (event === "seeking") {
+                        videos.right.currentTime(this.currentTime());
+                    }
+
+                    if (event === "play" || event === "pause") {
+                        videos.right[ event ]();
+                    }
+                });
+            });
+
+            load_video = function(element, mp4_path, webm_path) {
+                var r = new XMLHttpRequest();
+                r.onload = function() {
+                    element.src = URL.createObjectURL(r.response);
+                    console.log("loaded!" + element.id);
+                };
+                if (element.canPlayType('video/mp4')) {
+                    r.open("GET", mp4_path);
+                }
+                else {
+                    r.open("GET", webm_path);
+                }
+                r.responseType = "blob";
+                r.send();
+            };
+
+            Popcorn.forEach(videos, function (media, type) {
+                progress[media.id] = false;
+                media.on("canplayall",function () {
+                    controls.scrub.attr("max", media.duration()*10);
+                    console.log("canplayall" + media.id);
+
+                    progress[media.id] = true;
+                    if (Object.keys(progress).every(function(key){ return progress[key] })) {
+                        console.log("start playing!")
+                        sync();
+                        videos.left.play();
+                        controls.preloader.hide();
+                    }
+                })
+            });
+
+            controls.scrub.bind("change", function() {
+                var val = this.value;
+                videos.left.currentTime( val/10 );
+                videos.right.currentTime( val/10 );
+            });
+
+            controls.play.click(function() {
+                videos.left.play();
+            });
+
+            controls.pause.click(function() {
+                videos.left.pause();
+            });
+
+            function sync() {
+                if (videos.right.media.readyState === 4 ) {
+                    left_time = videos.left.currentTime();
+                    right_time = videos.right.currentTime();
+                    if (Math.abs(left_time - right_time) > 0.1) {
+                        videos.right.currentTime(left_time)
+                    }
+                }
+                requestAnimFrame( sync );
+            }
+
+            load_video(videos_el.left, paths.left.mp4, paths.left.webm);
+            load_video(videos_el.right, paths.right.mp4, paths.right.webm);
+        </script>
     {% endif %}
 </body>
 </html>

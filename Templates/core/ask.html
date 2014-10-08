@@ -17,47 +17,57 @@
 
 <body>
     {% if question %}
+        <div align="center">
         <table>
             <tbody>
                 <tr>
-                    <td>
-                        {{ question.sequence }}
-                        {{ question.left }}
-                    </td>
-                    <td>
-                        {{ question.sequence }}
-                        {{ question.right }}
+                    <td colspan="2" align="center">
+                        Вопрос #{{ counter.current }} из {{ counter.total }}
                     </td>
                 </tr>
                 <tr>
                     <td>
+                        <video width="320" height="240">
+                            <source src="{{ video_path }}/{{ question.sequence.name }}/{{ question.left.short_name }}.mp4" type="video/mp4">
+                            <source src="{{ video_path }}/{{ question.sequence.name }}/{{ question.left.short_name }}.webm" type="video/webm">
+                            К сожалению, ваш браузер не поддерживает воспроизведение видео :(
+                        </video>
+                    </td>
+                    <td>
+                        <video width="320" height="240">
+                            <source src="{{ video_path }}/{{ question.sequence.name }}/{{ question.right.short_name }}.mp4" type="video/mp4">
+                            <source src="{{ video_path }}/{{ question.sequence.name }}/{{ question.right.short_name }}.webm" type="video/webm">
+                            К сожалению, ваш браузер не поддерживает воспроизведение видео :(
+                        </video>
+                    </td>
+                </tr>
+                <tr>
+                    <td align="center">
                         <form method="post">
                             {% csrf_token %}
                             {{ answer_left_form }}
-                            <input type="submit">
+                            <input type="submit" value="Левый вариант лучше">
                         </form>
                     </td>
-                    <td>
+                    <td align="center">
                         <form method="post">
                             {% csrf_token %}
                             {{ answer_right_form }}
-                            <input type="submit">
+                            <input type="submit" value="Правый вариант лучше">
                         </form>
                     </td>
                 </tr>
                 <tr>
-                   <td colspan="2">
+                   <td colspan="2" align="center">
                        <form method="post">
                            {% csrf_token %}
                            {{ answer_none_form }}
-                           <input type="submit">
+                           <input type="submit" value="Не получается выбрать лучший">
                        </form>
                    </td>
                 </tr>
             </tbody>
         </table>
-        <div>
-            Вопрос #{{ counter.current }} из {{ counter.total }}
         </div>
     {% endif %}
 </body>

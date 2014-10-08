@@ -143,3 +143,5 @@ EMAIL_HOST_PASSWORD = '' # password
 EMAIL_USE_TLS = True
 
 ALERT_EMAIL = '@' # email for alerts
+
+VIDEO_CORE_PATH = 'http://ec2-54-218-67-110.us-west-2.compute.amazonaws.com/content/videos/composites'

@@ -6,6 +6,7 @@ from django.db.models import Q
 from django.http import HttpResponseForbidden, HttpResponse
 from django.shortcuts import render, redirect
 from django.template.defaultfilters import register
+from VideoPair import settings
 
 from core.forms import AnswerForm, ParticipantForm, PairForm
 from core.models import Pair, Sequence, Method, Participant, Answer, Question
@@ -102,6 +103,7 @@ def ask(request, template_name='core/ask.html'):
         return redirect(reverse('core.views.index'))
 
     return render(request, template_name, {
+        'video_path': settings.VIDEO_CORE_PATH,
         'participant': participant,
         'counter': {
             'total': total,

@@ -1,1 +1,203 @@
-[{"pk": 4, "model": "core.sequence", "fields": {"name": "city", "sequence_type": 1}}, {"pk": 5, "model": "core.sequence", "fields": {"name": "rain", "sequence_type": 1}}, {"pk": 6, "model": "core.sequence", "fields": {"name": "concert", "sequence_type": 1}}, {"pk": 7, "model": "core.sequence", "fields": {"name": "snow-1", "sequence_type": 1}}, {"pk": 8, "model": "core.sequence", "fields": {"name": "snow-2", "sequence_type": 1}}, {"pk": 9, "model": "core.sequence", "fields": {"name": "Slava", "sequence_type": 2}}, {"pk": 10, "model": "core.sequence", "fields": {"name": "Vitaliy", "sequence_type": 2}}, {"pk": 11, "model": "core.sequence", "fields": {"name": "Artem", "sequence_type": 2}}, {"pk": 12, "model": "core.sequence", "fields": {"name": "Alex", "sequence_type": 2}}, {"pk": 13, "model": "core.sequence", "fields": {"name": "Dmitriy", "sequence_type": 2}}, {"pk": 1, "model": "core.method", "fields": {"notes": "[each]", "middle_name": "Bauesian matting", "short_name": "BM", "full_name": "A Bauesian approach to digital matting", "year": 2001}}, {"pk": 2, "model": "core.method", "fields": {"notes": "[each]", "middle_name": "Robust matting", "short_name": "RM", "full_name": "Optimized color sampling for robust matting", "year": 2007}}, {"pk": 3, "model": "core.method", "fields": {"notes": "[each]", "middle_name": "Closed-form", "short_name": "CF", "full_name": "A closed-form solution to natural image matting", "year": 2008}}, {"pk": 4, "model": "core.method", "fields": {"notes": "[each][slow]", "middle_name": "Non-local matting", "short_name": "NLM", "full_name": "Non-local matting ", "year": 2011}}, {"pk": 5, "model": "core.method", "fields": {"notes": "[each]", "middle_name": "Learning based", "short_name": "LB", "full_name": "Learning based digital matting", "year": 2009}}, {"pk": 6, "model": "core.method", "fields": {"notes": "[each]", "middle_name": "Shared matting", "short_name": "ShM", "full_name": "Shared sampling for real-time alpha matting", "year": 2010}}, {"pk": 7, "model": "core.method", "fields": {"notes": "[each][slow]", "middle_name": "Comprehensive sampling", "short_name": "CS", "full_name": "Improving image matting using comprehensive sampling sets", "year": 2008}}, {"pk": 8, "model": "core.method", "fields": {"notes": "[each][slow]", "middle_name": "Weighted color", "short_name": "WCM", "full_name": "Weighted color and texture sample selection for image matting", "year": 2013}}, {"pk": 9, "model": "core.method", "fields": {"notes": "[each]", "middle_name": "KNN matting", "short_name": "KNN", "full_name": "KNN matting", "year": 2012}}, {"pk": 10, "model": "core.method", "fields": {"notes": "[each][slow]", "middle_name": "Spectral matting", "short_name": "SpM", "full_name": "Spectral matting", "year": 2012}}, {"pk": 11, "model": "core.method", "fields": {"notes": "[each]", "middle_name": "Refine edge", "short_name": "RE", "full_name": "Refine edge tool in Adobe After Effects", "year": 2013}}]
+[
+    {
+        "pk": 4,
+        "model": "core.sequence",
+        "fields": {
+            "name": "city",
+            "sequence_type": 1
+        }
+    },
+    {
+        "pk": 5,
+        "model": "core.sequence",
+        "fields": {
+            "name": "rain",
+            "sequence_type": 1
+        }
+    },
+    {
+        "pk": 6,
+        "model": "core.sequence",
+        "fields": {
+            "name": "concert",
+            "sequence_type": 1
+        }
+    },
+    {
+        "pk": 7,
+        "model": "core.sequence",
+        "fields": {
+            "name": "snow-1",
+            "sequence_type": 1
+        }
+    },
+    {
+        "pk": 8,
+        "model": "core.sequence",
+        "fields": {
+            "name": "snow-2",
+            "sequence_type": 1
+        }
+    },
+    {
+        "pk": 9,
+        "model": "core.sequence",
+        "fields": {
+            "name": "slava",
+            "sequence_type": 2
+        }
+    },
+    {
+        "pk": 10,
+        "model": "core.sequence",
+        "fields": {
+            "name": "vitaliy",
+            "sequence_type": 2
+        }
+    },
+    {
+        "pk": 11,
+        "model": "core.sequence",
+        "fields": {
+            "name": "artem",
+            "sequence_type": 2
+        }
+    },
+    {
+        "pk": 12,
+        "model": "core.sequence",
+        "fields": {
+            "name": "alex",
+            "sequence_type": 2
+        }
+    },
+    {
+        "pk": 13,
+        "model": "core.sequence",
+        "fields": {
+            "name": "dmitriy",
+            "sequence_type": 2
+        }
+    },
+    {
+        "pk": 1,
+        "model": "core.method",
+        "fields": {
+            "notes": "[each]",
+            "middle_name": "Bauesian matting",
+            "short_name": "BM",
+            "full_name": "A Bauesian approach to digital matting",
+            "year": 2001
+        }
+    },
+    {
+        "pk": 2,
+        "model": "core.method",
+        "fields": {
+            "notes": "[each]",
+            "middle_name": "Robust matting",
+            "short_name": "RM",
+            "full_name": "Optimized color sampling for robust matting",
+            "year": 2007
+        }
+    },
+    {
+        "pk": 3,
+        "model": "core.method",
+        "fields": {
+            "notes": "[each]",
+            "middle_name": "Closed-form",
+            "short_name": "CF",
+            "full_name": "A closed-form solution to natural image matting",
+            "year": 2008
+        }
+    },
+    {
+        "pk": 4,
+        "model": "core.method",
+        "fields": {
+            "notes": "[each][slow]",
+            "middle_name": "Non-local matting",
+            "short_name": "NlM",
+            "full_name": "Non-local matting ",
+            "year": 2011
+        }
+    },
+    {
+        "pk": 5,
+        "model": "core.method",
+        "fields": {
+            "notes": "[each]",
+            "middle_name": "Learning based",
+            "short_name": "LB",
+            "full_name": "Learning based digital matting",
+            "year": 2009
+        }
+    },
+    {
+        "pk": 6,
+        "model": "core.method",
+        "fields": {
+            "notes": "[each]",
+            "middle_name": "Shared matting",
+            "short_name": "ShM",
+            "full_name": "Shared sampling for real-time alpha matting",
+            "year": 2010
+        }
+    },
+    {
+        "pk": 7,
+        "model": "core.method",
+        "fields": {
+            "notes": "[each][slow]",
+            "middle_name": "Comprehensive sampling",
+            "short_name": "CS",
+            "full_name": "Improving image matting using comprehensive sampling sets",
+            "year": 2008
+        }
+    },
+    {
+        "pk": 8,
+        "model": "core.method",
+        "fields": {
+            "notes": "[each][slow]",
+            "middle_name": "Weighted color",
+            "short_name": "WCM",
+            "full_name": "Weighted color and texture sample selection for image matting",
+            "year": 2013
+        }
+    },
+    {
+        "pk": 9,
+        "model": "core.method",
+        "fields": {
+            "notes": "[each]",
+            "middle_name": "KNN matting",
+            "short_name": "KNN",
+            "full_name": "KNN matting",
+            "year": 2012
+        }
+    },
+    {
+        "pk": 10,
+        "model": "core.method",
+        "fields": {
+            "notes": "[each][slow]",
+            "middle_name": "Spectral matting",
+            "short_name": "SpM",
+            "full_name": "Spectral matting",
+            "year": 2012
+        }
+    },
+    {
+        "pk": 11,
+        "model": "core.method",
+        "fields": {
+            "notes": "[each]",
+            "middle_name": "Refine edge",
+            "short_name": "RE",
+            "full_name": "Refine edge tool in Adobe After Effects",
+            "year": 2013
+        }
+    }
+]

@@ -122,15 +122,12 @@ def invalidate(request):
 
 @staff_member_required
 def cp(request, template_name='core/cp.html'):
-
     if request.method == 'POST':
         pair_form = PairForm(request.POST)
 
         if pair_form.is_valid():
             pair = pair_form.save(commit=False)
             pair.save()
-
-    page = request.GET.get('page', 1)
 
     methods = Method.objects.all()
     pairs = Pair.objects.all()
@@ -150,6 +147,7 @@ def cp(request, template_name='core/cp.html'):
     } for method in methods]
 
     return render(request, template_name, {
+        'request': request,
         'e_methods_h': list(enumerate(methods)),
         'e_methods_v': list(enumerate(methods)),
         'stats': stats,

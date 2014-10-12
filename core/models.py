@@ -16,6 +16,9 @@ class Sequence(models.Model):
     def __repr__(self):
         return self.name
 
+    def __str__(self):
+        return self.name
+
     def __unicode__(self):
         return unicode(self.name)
 
@@ -34,6 +37,9 @@ class Method(models.Model):
     def __repr__(self):
         return self.short_name
 
+    def __str__(self):
+        return self.short_name
+
     def __unicode__(self):
         return unicode(self.short_name)
 
@@ -47,6 +53,9 @@ class Pair(models.Model):
         verbose_name_plural = u'Pairs'
 
     def __repr__(self):
+        return '{} vs {}'.format(self.left, self.right)
+
+    def __str__(self):
         return '{} vs {}'.format(self.left, self.right)
 
     def __unicode__(self):
@@ -71,6 +80,9 @@ class Participant(models.Model):
     def __repr__(self):
         return self.name
 
+    def __str__(self):
+        return self.name
+
     def __unicode__(self):
         return unicode(self.name)
 
@@ -90,6 +102,9 @@ class Question(models.Model):
         return self.right == method or self.left == method
 
     def __repr__(self):
+        return '{} vs {} [{}] <{}>'.format(self.left, self.right, self.sequence, self.participant)
+
+    def __str__(self):
         return '{} vs {} [{}] <{}>'.format(self.left, self.right, self.sequence, self.participant)
 
     def __unicode__(self):
@@ -152,6 +167,9 @@ class Answer(models.Model):
     question_participant.short_description = u'Участник'
 
     def __repr__(self):
+        return '{}! {}'.format(self.best, self.question)
+
+    def __str__(self):
         return '{}! {}'.format(self.best, self.question)
 
     def __unicode__(self):

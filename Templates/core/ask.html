@@ -4,75 +4,99 @@
 <head>
     <meta charset="utf-8">
     <title>VideoPair</title>
+    <link href="{{ STATIC_URL }}css/bootstrap.min.css" rel="stylesheet">
+
+    <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+      <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
 
     <script src="{{ STATIC_URL }}js/jquery-1.11.1.min.js"></script>
     <script src="{{ STATIC_URL }}js/bootstrap.min.js"></script>
     <script src="{{ STATIC_URL }}js/popcorn.min.js"></script>
 
-    <!--[if lt IE 9]>
-    <script src="http://html5shiv.googlecode.com/svn/trunk/html5.js"></script>
-    <![endif]-->
+    <style>
+        body {
+
+        }
+        video {
+            width: 100%    !important;
+            height: auto   !important;
+        }
+        .participant {
+            margin: 20px;
+        }
+        .header-line {
+            border-bottom: 1px solid #eee;
+        }
+        .none-form {
+            margin-top: 20px;
+            text-align: center;
+        }
+    </style>
 </head>
 
 <body>
     {% if question %}
-        <div align="center">
-        <table>
-            <tbody>
-                <tr>
-                    <td colspan="2" align="center">
-                        {{ participant.name }}
-                    </td>
-                </tr>
-                <tr>
-                    <td colspan="2" align="center">
-                        Вопрос #{{ counter.current }} из {{ counter.total }}
-                    </td>
-                </tr>
-                <tr>
-                    <td>
-                        <video width="320" height="240" id="player-video-left" loop></video>
-                    </td>
-                    <td>
-                        <video width="320" height="240" id="player-video-right" loop></video>
-                    </td>
-                </tr>
-                <tr>
-                    <td colspan="2">
-                        <button id="player-controls-play"><span class=""></span>Play</button>
-                        <button id="player-controls-pause"><span class=""></span>Pause</button>
-                        <input type="range" value="0" id="player-controls-scrub" />
-                        <span class="player-preloader">Видео загружается...</span>
-                    </td>
-                </tr>
-                <tr>
-                    <td align="center">
-                        <form method="post">
-                            {% csrf_token %}
-                            {{ answer_left_form }}
-                            <input type="submit" value="Левый вариант лучше">
-                        </form>
-                    </td>
-                    <td align="center">
-                        <form method="post">
-                            {% csrf_token %}
-                            {{ answer_right_form }}
-                            <input type="submit" value="Правый вариант лучше">
-                        </form>
-                    </td>
-                </tr>
-                <tr>
-                   <td colspan="2" align="center">
-                       <form method="post">
-                           {% csrf_token %}
-                           {{ answer_none_form }}
-                           <input type="submit" value="Не получается выбрать лучший">
-                       </form>
-                   </td>
-                </tr>
-            </tbody>
-        </table>
-        </div>
+         <div class="container">
+             <div class="header header-line clearfix">
+                 <div class="pull-left">
+                     <h3>Сравнение видеопоследовательностей</h3>
+                     <p class="lead lead-smallmargin">
+                         Вопрос #{{ counter.current }} из {{ counter.total }}
+                     </p>
+                 </div>
+                 <div class="participant pull-right">
+                     <p class="small">
+                         <span class="glyphicon glyphicon-user"></span> {{ participant.name }}
+                     </p>
+                 </div>
+             </div>
+
+            <div class="row">
+                <div class="col-md-6">
+                    <video id="player-video-left" loop poster="{{ STATIC_URL }}poster.gif"></video>
+                </div>
+                <div class="col-md-6">
+                    <video id="player-video-right" loop poster="{{ STATIC_URL }}poster.gif"></video>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6 clearfix">
+                    <form method="post">
+                        {% csrf_token %}
+                        {{ answer_left_form }}
+                        <button id="best-left" type="submit" class="btn btn-lg btn-primary pull-left" disabled>
+                            Левый вариант лучше
+                        </button>
+                    </form>
+                </div>
+                <div class="col-md-6 clearfix">
+                    <form method="post">
+                        {% csrf_token %}
+                        {{ answer_right_form }}
+                        <button id="best-right" type="submit" class="btn btn-lg btn-primary pull-right" disabled>
+                            Правый вариант лучше
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-12 none-form">
+                    <form method="post">
+                        {% csrf_token %}
+                        {{ answer_none_form }}
+                        <button id="best-none" type="submit" class="btn btn-lg btn-default" disabled>
+                            Не получается выбрать лучший вариант
+                        </button>
+                    </form>
+                </div>
+            </div>
+         </div>
+
+         <!--<span class="player-preloader">Видео загружается...</span>-->
 
         <script>
             window.requestAnimFrame = function(){
@@ -98,19 +122,20 @@
                         webm: "{{ video_path }}/{{ question.sequence.name }}/{{ question.right.short_name }}.webm"
                     }
                 },
+
                 videos = {
                     left: Popcorn("#player-video-left"),
                     right: Popcorn("#player-video-right")
                 },
+                controls = {
+                    //    preloader: $(".player-preloader")
+                    best_left: $("#best-left")[0],
+                    best_none: $("#best-none")[0],
+                    best_right: $("#best-right")[0]
+                },
                 videos_el = {
                     left: $("#player-video-left")[0],
                     right: $("#player-video-right")[0]
-                },
-                controls = {
-                    preloader: $(".player-preloader"),
-                    scrub: $("#player-controls-scrub"),
-                    play: $("#player-controls-play"),
-                    pause: $("#player-controls-pause")
                 },
                 progress = {},
                 events = "play pause timeupdate seeking".split(/\s+/g);
@@ -122,7 +147,6 @@
                             return;
                         }
                         videos.right.emit("timeupdate");
-                        controls.scrub.val(this.currentTime()*10);
                         return;
                     }
 
@@ -140,7 +164,7 @@
                 var r = new XMLHttpRequest();
                 r.onload = function() {
                     element.src = URL.createObjectURL(r.response);
-                    console.log("loaded!" + element.id);
+                    //console.log("loaded!" + element.id);
                 };
                 if (element.canPlayType('video/mp4')) {
                     r.open("GET", mp4_path);
@@ -155,31 +179,18 @@
             Popcorn.forEach(videos, function (media, type) {
                 progress[media.id] = false;
                 media.on("canplayall",function () {
-                    controls.scrub.attr("max", media.duration()*10);
-                    console.log("canplayall" + media.id);
-
+                    //console.log("canplayall" + media.id);
                     progress[media.id] = true;
                     if (Object.keys(progress).every(function(key){ return progress[key] })) {
-                        console.log("start playing!")
+                        //console.log("start playing!")
                         sync();
                         videos.left.play();
-                        controls.preloader.hide();
+                        //controls.preloader.hide();
+                        controls.best_left.removeAttribute('disabled');
+                        controls.best_right.removeAttribute('disabled');
+                        controls.best_none.removeAttribute('disabled');
                     }
                 })
-            });
-
-            controls.scrub.bind("change", function() {
-                var val = this.value;
-                videos.left.currentTime( val/10 );
-                videos.right.currentTime( val/10 );
-            });
-
-            controls.play.click(function() {
-                videos.left.play();
-            });
-
-            controls.pause.click(function() {
-                videos.left.pause();
             });
 
             function sync() {

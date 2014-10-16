@@ -1,0 +1,64 @@
+{% extends "base_cp.html" %}
+{% block content %}
+    <div>
+        <p class="lead">Статистика упоминания методов</p>
+        <table class="table">
+            <thead>
+            <th>Метод</th>
+            <th>В вопросах</th>
+            <th>В парах</th>
+            <th>Всего</th>
+            </thead>
+            <tbody>
+            {% for item in stats %}
+                <tr>
+                    <td>{{ item.method }}</td>
+                    <td>{{ item.history }}</td>
+                    <td>{{ item.future }}</td>
+                    <td>{{ item.future|add:item.history }}</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    {% if proposed_pairs %}
+        <div>
+            <p class="lead">Добавлены пары</p>
+            <table class="table">
+                <thead>
+                <th>Левый метод</th>
+                <th>Правый метод</th>
+                </thead>
+                <tbody>
+                {% for item in proposed_pairs %}
+                    <tr>
+                        <td>{{ item.left }}</td>
+                        <td>{{ item.right }}</td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+            <div class="form-group">
+                <a class="btn btn-default" href="{% url 'core.views.loader' %}">Добавить ещё</a>
+            </div>
+        </div>
+    {% else %}
+        <div>
+            <p class="lead">Загрузчик пар</p>
+            <div>
+                <form action="" method="post">
+                    {% csrf_token %}
+                    <div class="form-group">
+                        <textarea class="form-control" id="id_text" name="text" placeholder="Method1 Method2" rows="20"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <button type="submit" class="btn btn-default">
+                            Добавить
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    {% endif %}
+{% endblock %}

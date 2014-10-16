@@ -10,7 +10,7 @@ from VideoPair import settings
 
 from core.forms import AnswerForm, ParticipantForm, PairForm, LoaderForm
 from core.models import Pair, Sequence, Method, Participant, Answer, Question
-from core.utils import get_client_ip, get_client_ua, get_or_none, generate_pairs
+from core.utils import get_client_ip, get_client_ua, get_or_none, generate_pairs, send_email
 
 
 @register.filter

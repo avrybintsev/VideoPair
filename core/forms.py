@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from django.forms import ModelForm, Textarea, TextInput, HiddenInput
+from django.forms import ModelForm, Textarea, TextInput, HiddenInput, Form, CharField
 
 # Extended ModelForm
 from core.models import Participant, Answer, Pair
@@ -81,4 +81,6 @@ class PairForm(ExtendedMetaModelForm):
         model = Pair
         fields = ('left', 'right')
 
-        #
+
+class LoaderForm(Form):
+    text = CharField()

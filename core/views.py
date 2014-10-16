@@ -8,7 +8,7 @@ from django.shortcuts import render, redirect
 from django.template.defaultfilters import register
 from VideoPair import settings
 
-from core.forms import AnswerForm, ParticipantForm, PairForm
+from core.forms import AnswerForm, ParticipantForm, PairForm, LoaderForm
 from core.models import Pair, Sequence, Method, Participant, Answer, Question
 from core.utils import get_client_ip, get_client_ua, get_or_none, generate_pairs
 
@@ -152,6 +152,67 @@ def cp(request, template_name='core/cp.html'):
         'e_methods_v': list(enumerate(methods)),
         'stats': stats,
         'scores': scores,
+    })
+
+
+@staff_member_required
+def loader(request, template_name='core/loader.html'):
+    methods = Method.objects.all()
+    pairs = Pair.objects.all()
+    questions = Question.objects.all()
+
+    proposed_pairs = []
+
+    if request.method == 'POST':
+        loader_form = LoaderForm(request.POST)
+
+        if loader_form.is_valid():
+            text_pairs = filter(
+                lambda x: len(x) == 2,
+                map(
+                    lambda item: item.split(' '),
+                    loader_form.cleaned_data['text'].split('\r\n')
+                )
+            )
+
+            def get_method(key):
+                for method in methods:
+                    if method.short_name.upper() == key.upper():
+                        return method
+                return None
+
+            key_pairs = {
+                k: get_method(k) for k in set([item for lst in text_pairs for item in lst])
+            }
+
+            proposed_pairs = filter(
+                lambda x: x['left'] and x['right'],
+                [{'left': key_pairs[item[0]], 'right': key_pairs[item[1]]} for item in text_pairs]
+            )
+
+            added_pairs = map(
+                lambda x: Pair(left=x['left'], right=x['right']),
+                proposed_pairs
+            )
+
+            for pair in added_pairs:
+                pair.save()
+
+    stats = [{
+                 'method': method,
+                 'history': questions.filter(Q(left=method) | Q(right=method)).count(),
+                 'future': pairs.filter(Q(left=method) | Q(right=method)).count(),
+                 } for method in methods]
+
+    loader_form = LoaderForm()
+
+    return render(request, template_name, {
+        'loader_form': loader_form,
+        'request': request,
+        'e_methods_h': list(enumerate(methods)),
+        'e_methods_v': list(enumerate(methods)),
+        'stats': stats,
+        'proposed_pairs': proposed_pairs,
     })
 
 

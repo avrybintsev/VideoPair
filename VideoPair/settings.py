@@ -136,12 +136,12 @@ FIXTURE_DIRS = (
 
 ITEMS_ON_PAGE = 25
 
-EMAIL_HOST = 'smtp.gmail.com'
-EMAIL_PORT = '587'
-EMAIL_HOST_USER = '@gmail.com' # account
-EMAIL_HOST_PASSWORD = '' # password
-EMAIL_USE_TLS = True
+EMAIL_HOST = 'smtp.yandex.ru'
+EMAIL_PORT = '465'
+EMAIL_HOST_USER = 'video.pair@yandex.ru' # account
+EMAIL_HOST_PASSWORD = 'videomatting' # password
+EMAIL_USE_SSL = True
 
-ALERT_EMAIL = '@' # email for alerts
+ALERT_EMAIL = 'merofeev@graphics.cs.msu.ru' # email for alerts
 
 VIDEO_CORE_PATH = 'http://ec2-54-218-67-110.us-west-2.compute.amazonaws.com/content/videos/composites'

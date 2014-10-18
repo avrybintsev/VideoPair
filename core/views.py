@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
+import json
 
+from django.contrib import messages
 from django.contrib.admin.views.decorators import staff_member_required
 from django.core.urlresolvers import reverse
 from django.db.models import Q
@@ -14,14 +16,38 @@ from core.utils import get_client_ip, get_client_ua, get_or_none, generate_pairs
 
 
 @register.filter
-def average(sum, n):
-    return (sum+0.0) / n if n else 0
+def average(s, n):
+    return (s + 0.0) / n if n else 0
 
 
-def index(request, template_name='core/index.html'):
+def index(request, lang):
+    template_name='core/{}/index.html'.format(lang if lang else 'ru')
+
     participant_id = request.session.get('participant_id')
     participant = get_or_none(Participant, pk=participant_id)
+    participant_form = ParticipantForm()
 
+    questions = Question.objects.filter(participant=participant, answered=False)
+    forms = []
+    for question in questions:
+        forms.append({
+            'question': question,
+            'answer_left_form': AnswerForm(initial={'best': question.left, 'question': question}),
+            'answer_right_form': AnswerForm(initial={'best': question.right, 'question': question}),
+            'answer_none_form': AnswerForm(initial={'best': None, 'question': question}),
+        })
+
+    return render(request, template_name, {
+        'video_path': settings.VIDEO_CORE_PATH,
+        'participant': participant,
+        'questions': questions,
+        'participant_form': participant_form,
+        'forms': forms,
+        'lang': lang,
+    })
+
+
+def new(request):
     if request.method == 'POST':
         participant_form = ParticipantForm(request.POST)
 
@@ -53,28 +79,14 @@ def index(request, template_name='core/index.html'):
                 pair.delete()
 
             request.session['participant_id'] = participant.id
+            messages.add_message(request, messages.SUCCESS, u'Новый участник создан')
+            return redirect(reverse('core.views.index'))
 
-            return redirect(reverse('core.views.ask'))
-
-    questions = Question.objects.filter(participant=participant, answered=False)
-    if questions:
-        return redirect('core.views.ask')
-
-    participant_form = ParticipantForm()
-
-    return render(request, template_name, {
-        'participant': participant,
-        'participant_form': participant_form,
-    })
+    messages.add_message(request, messages.ERROR, u'Не удалось создать участника')
+    return redirect(reverse('core.views.index'))
 
 
-def ask(request, template_name='core/ask.html'):
-    participant_id = request.session.get('participant_id')
-    participant = get_or_none(Participant, pk=participant_id)
-
-    if not participant:
-        return HttpResponseForbidden()
-
+def answer(request):
     if request.method == 'POST':
         answer_form = AnswerForm(request.POST)
 
@@ -85,40 +97,15 @@ def ask(request, template_name='core/ask.html'):
             answer.question.answered = True
             answer.question.save()
 
-            return redirect(reverse('core.views.ask'))
+            return HttpResponse(json.dumps({'status': 'ok'}))
 
-    total = Sequence.objects.all().count()
-    questions = Question.objects.filter(participant=participant, answered=False)
-    question = questions[0] if questions else None
-
-    answer_left_form = AnswerForm(
-        initial={'best': question.left, 'question': question}) if question else None
-    answer_right_form = AnswerForm(
-        initial={'best': question.right, 'question': question}) if question else None
-    answer_none_form = AnswerForm(
-        initial={'best': None, 'question': question} if question else None
-    )
-
-    if question is None:
-        return redirect(reverse('core.views.index'))
-
-    return render(request, template_name, {
-        'video_path': settings.VIDEO_CORE_PATH,
-        'participant': participant,
-        'counter': {
-            'total': total,
-            'current': total - len(questions) + 1,
-        },
-        'question': question,
-        'answer_left_form': answer_left_form,
-        'answer_right_form': answer_right_form,
-        'answer_none_form': answer_none_form,
-    })
+    return HttpResponse(json.dumps({'status': 'error'}))
 
 
 def invalidate(request):
     del request.session['participant_id']
     return redirect(reverse('core.views.index'))
+
 
 @staff_member_required
 def cp(request, template_name='core/cp.html'):

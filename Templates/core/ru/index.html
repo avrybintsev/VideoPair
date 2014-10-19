@@ -45,6 +45,8 @@
             display: none;
         }
         .loader-block {
+            margin: 0 auto;
+            max-width: 640px;
             display: block;
         }
         .question-block {
@@ -62,6 +64,12 @@
             text-align: center;
         }
         .progress-text {
+            text-align: center;
+        }
+        .begin-block {
+            margin: 0 auto;
+            max-width: 640px;
+            display: none;
             text-align: center;
         }
     </style>
@@ -83,7 +91,7 @@
         <div class="collapse navbar-collapse">
             <ul class="nav navbar-nav">
                 {% if participant %}
-                    <li><a href="{% url 'core.views.invalidate' %}">Выйти ({{ participant }})</a></li>
+                    <li><a href="{% url 'core.views.invalidate' 'ru' %}">Выйти ({{ participant }})</a></li>
                 {% endif %}
                 <li><a href="{% url 'core.views.index' 'en' %}">Сменить язык</a></li>
             </ul>
@@ -98,7 +106,7 @@
                 <h3 class="panel-title">Сравнение видеопоследовательностей</h3>
             </div>
             <div class="panel-body">
-                <form class="form-signin" role="form" method="post" action="/new">
+                <form class="form-signin" role="form" method="post" action="/ru/new">
                     {% csrf_token %}
                     <fieldset>
                         <div class="form-group">
@@ -116,7 +124,7 @@
             </div>
         </div>
     </div>
-{% else %}
+{% elif forms|length > 0 %}
     <div class="container">
         <div class="finish-block" id="finish-block">
             <p>{{ participant.name }}, вы ответили на все вопросы, спасибо!</p>
@@ -129,7 +137,7 @@
                     Немного информации.
                 </p>
             </div>
-            <div class="progress-block">
+            <div class="progress-block" id="progress-block">
                 <div class="progress-text">
                     Загрузка видео: <span id="progress-current">0</span> из <span id="progress-total">20</span>
                 </div>
@@ -138,6 +146,11 @@
                          aria-valuenow="0" aria-valuemin="0" aria-valuemax="20" style="width: 0%;">
                     </div>
                 </div>
+            </div>
+            <div class="begin-block" id="begin-block">
+                 <button class="btn btn-lg btn-primary" id="begin-button">
+                     Начать тестирование!
+                 </button>
             </div>
         </div>
 
@@ -160,7 +173,7 @@
 
                     <div class="row">
                         <div class="col-md-6 clearfix">
-                            <form method="post" action="/ans" id="form-left{{ forloop.counter0 }}">
+                            <form method="post" action="/ans" id="form-left{{ forloop.counter0 }}" class="answer-form">
                                 {% csrf_token %}
                                 {{ form.answer_left_form }}
                                 <button id="best-left{{ forloop.counter0 }}" type="submit" class="btn btn-lg btn-primary pull-left">
@@ -169,7 +182,7 @@
                             </form>
                         </div>
                         <div class="col-md-6 clearfix">
-                            <form method="post" action="/ans" id="form-right{{ forloop.counter0 }}">
+                            <form method="post" action="/ans" id="form-right{{ forloop.counter0 }}" class="answer-form">
                                 {% csrf_token %}
                                 {{ form.answer_right_form }}
                                 <button id="best-right{{ forloop.counter0 }}" type="submit" class="btn btn-lg btn-primary pull-right">
@@ -181,7 +194,7 @@
 
                     <div class="row">
                         <div class="col-md-12 none-form">
-                            <form method="post" action="/ans" id="form-none{{ forloop.counter0 }}">
+                            <form method="post" action="/ans" id="form-none{{ forloop.counter0 }}" class="answer-form">
                                 {% csrf_token %}
                                 {{ form.answer_none_form }}
                                 <button id="best-none{{ forloop.counter0 }}" type="submit" class="btn btn-lg btn-default">
@@ -234,6 +247,9 @@
                 controls = {
                     loader: $("#loader-block"),
                     finish: $("#finish-block"),
+                    progress_block: $("#progress-block"),
+                    begin_block: $("#begin-block"),
+                    begin_button: $("#begin-button"),
                     progress: $("#progress"),
                     progress_total: $("#progress-total"),
                     progress_current: $("#progress-current"),
@@ -246,17 +262,9 @@
 
                 progress = {},
 
-                current = 0,
+                current = -1,
 
                 total = {{ forms|length }};
-
-
-            videos.forEach(function (video) {
-                var event = "play";
-                video.left.on(event, function () {
-                    video.right[ event ]();
-                });
-            });
 
         update_progress = function() {
             var progress_percent = Math.round((progress_current / progress_total) * 100);
@@ -283,6 +291,49 @@
             r.send();
         };
 
+        next_question = function () {
+            if (current >= 0) {
+                controls.questions[current].hide();
+            }
+            current++;
+            if (current < total) {
+                sync();
+                controls.questions[current].show();
+                videos[current].left.play();
+            } else {
+                controls.finish.show();
+            }
+        };
+
+        on_success = function (data) {
+            var status_object = $.parseJSON(data);
+            if (status_object.status == "ok") {
+                //console.log("ok");
+                next_question();
+            } else {
+                //console.log("error");
+            }
+        };
+
+        prepare = function() {
+            videos.forEach(function (video) {
+                var event = "play";
+                video.left.on(event, function () {
+                    video.right[ event ]();
+                });
+            });
+
+            $(".answer-form").ajaxForm({url: '/ans', type: 'post', success: on_success});
+
+            controls.begin_button.click(function () {
+                controls.loader.hide();
+                next_question();
+            });
+
+            controls.progress_block.hide();
+            controls.begin_block.show();
+        };
+
         videos.forEach(function (video) {
             Popcorn.forEach(video, function (media, type) {
                 progress[media.id] = false;
@@ -293,12 +344,7 @@
                     update_progress();
                     if (Object.keys(progress).every(function(key){ return progress[key] })) {
                         //console.log("start playing!");
-                        controls.loader.hide();
-
-                        sync();
-                        controls.questions[current].show();
-                        videos[current].left.play();
-                        //controls.preloader.hide();
+                        prepare();
                     }
                 })
             });
@@ -309,34 +355,14 @@
                 left_time = videos[current].left.currentTime();
                 right_time = videos[current].right.currentTime();
                 if (Math.abs(left_time - right_time) > 0.1) {
-                    videos[current].right.currentTime(left_time)
+                    videos[current].right.currentTime(left_time);
+
                 }
             }
             requestAnimFrame( sync );
         }
 
-        next_question = function () {
-            controls.questions[current].hide();
-            current++;
-            if (current < total) {
-                controls.questions[current].show();
-                videos[current].left.play();
-                sync();
-            } else {
-                controls.finish.show();
-            }
-        };
-
-        on_success = function (data) {
-            var status_object = $.parseJSON(data);
-            if (status_object.status == "ok") {
-                console.log("ok");
-                next_question();
-            } else {
-                console.log("error");
-            }
-        };
-
+        update_progress();
         {% for form in forms %}
             load_video(
                     videos_el[{{ forloop.counter0 }}].left,
@@ -348,27 +374,14 @@
                     "{{ video_path }}/{{ form.question.sequence.name }}/{{ form.question.right.short_name }}.mp4",
                     "{{ video_path }}/{{ form.question.sequence.name }}/{{ form.question.right.short_name }}.webm"
             );
-            $("#form-left{{ forloop.counter0 }}").ajaxForm(
-                    {
-                        url: '/ans',
-                        type: 'post',
-                        success: on_success
-                    });
-            $("#form-right{{ forloop.counter0 }}").ajaxForm(
-                    {
-                        url: '/ans',
-                        type: 'post',
-                        success: on_success
-                    });
-            $("#form-none{{ forloop.counter0 }}").ajaxForm(
-                    {
-                        url: '/ans',
-                        type: 'post',
-                        success: on_success
-                    });
         {% endfor %}
-
     </script>
+{% else %}
+    <div class="container">
+        <div>
+            <p>{{ participant.name }}, вы ответили на все вопросы, спасибо!</p>
+        </div>
+    </div>
 {% endif %}
 
 </body>

@@ -47,7 +47,7 @@ def index(request, lang):
     })
 
 
-def new(request):
+def new(request, lang):
     if request.method == 'POST':
         participant_form = ParticipantForm(request.POST)
 
@@ -79,11 +79,11 @@ def new(request):
                 pair.delete()
 
             request.session['participant_id'] = participant.id
-            messages.add_message(request, messages.SUCCESS, u'Новый участник создан')
-            return redirect(reverse('core.views.index'))
+            #messages.add_message(request, messages.SUCCESS, u'Новый участник создан')
+            return redirect(reverse('core.views.index', kwargs={'lang': lang}))
 
-    messages.add_message(request, messages.ERROR, u'Не удалось создать участника')
-    return redirect(reverse('core.views.index'))
+    #messages.add_message(request, messages.ERROR, u'Не удалось создать участника')
+    return redirect(reverse('core.views.index', kwargs={'lang': lang}))
 
 
 def answer(request):
@@ -102,9 +102,9 @@ def answer(request):
     return HttpResponse(json.dumps({'status': 'error'}))
 
 
-def invalidate(request):
+def invalidate(request, lang):
     del request.session['participant_id']
-    return redirect(reverse('core.views.index'))
+    return redirect(reverse('core.views.index', kwargs={'lang': lang}))
 
 
 @staff_member_required

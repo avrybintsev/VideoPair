@@ -34,9 +34,9 @@
         <div class="collapse navbar-collapse">
             <ul class="nav navbar-nav">
                 {% if participant %}
-                    <li><a href="{% url 'core.views.invalidate' 'ru' %}">Выйти ({{ participant }})</a></li>
+                    <li><a href="{% url 'core.views.invalidate' 'en' %}">Logout ({{ participant }})</a></li>
                 {% endif %}
-                <li><a href="{% url 'core.views.index' 'en' %}">English version</a></li>
+                <li><a href="{% url 'core.views.index' 'ru' %}">Russian version</a></li>
             </ul>
         </div>
     </div>
@@ -46,10 +46,10 @@
     <div class="container container-login">
         <div class="login-panel panel panel-default">
             <div class="panel-heading">
-                <h3 class="panel-title">Сравнение видеопоследовательностей</h3>
+                <h3 class="panel-title">Video comparison</h3>
             </div>
             <div class="panel-body">
-                <form class="form-signin" role="form" method="post" action="/ru/new">
+                <form class="form-signin" role="form" method="post" action="/en/new">
                     {% csrf_token %}
                     <fieldset>
                         <div class="form-group">
@@ -60,7 +60,7 @@
                             <input class="form-control" placeholder="Имя" id="id_name" name="name" type="name" value="">
                         </div>
                         <div class="form-button-container">
-                            <button class="btn btn-lg btn-success" type="submit">Начать тестирование</button>
+                            <button class="btn btn-lg btn-success" type="submit">Begin test</button>
                         </div>
                     </fieldset>
                 </form>
@@ -70,19 +70,19 @@
 {% elif forms|length > 0 %}
     <div class="container">
         <div class="finish-block" id="finish-block">
-            <p>{{ participant.name }}, вы ответили на все вопросы, спасибо!</p>
+            <p>{{ participant.name }}, you've answered all questions</p>
         </div>
 
         <div class="loader-block" id="loader-block">
             <div class="info-block">
-                <p class="lead">VideoPair - сравнение видеопоследовательностей!</p>
+                <p class="lead">VideoPair - video comparison</p>
                 <p>
-                    Немного информации.
+                    Some information
                 </p>
             </div>
             <div class="progress-block" id="progress-block">
                 <div class="progress-text">
-                    Загрузка видео: <span id="progress-current">0</span> из <span id="progress-total">20</span>
+                    Loading videos: <span id="progress-current">0</span> of <span id="progress-total">20</span>
                 </div>
                 <div class="progress">
                     <div id="progress" class="progress-bar" role="progressbar"
@@ -92,7 +92,7 @@
             </div>
             <div class="begin-block" id="begin-block">
                  <button class="btn btn-lg btn-primary" id="begin-button">
-                     Начать тестирование!
+                     Begin test
                  </button>
             </div>
         </div>
@@ -101,8 +101,8 @@
             <div class="question-block" id="question{{ forloop.counter0 }}">
                 <div class="container">
                     <div class="header header-line">
-                        <h3>Сравнение видеопоследовательностей</h3>
-                        <p class="lead lead-smallmargin">Вопрос #<span id="counter{{ forloop.counter0 }}">{{ forloop.counter }}</span> из {{ forms|length }}</p>
+                        <h3>Video comparison</h3>
+                        <p class="lead lead-smallmargin">Question #<span id="counter{{ forloop.counter0 }}">{{ forloop.counter }}</span> of {{ forms|length }}</p>
                     </div>
 
                     <div class="row">
@@ -120,7 +120,7 @@
                                 {% csrf_token %}
                                 {{ form.answer_left_form }}
                                 <button id="best-left{{ forloop.counter0 }}" type="submit" class="btn btn-lg btn-primary pull-left">
-                                    Левый вариант лучше
+                                    Left is better
                                 </button>
                             </form>
                         </div>
@@ -129,7 +129,7 @@
                                 {% csrf_token %}
                                 {{ form.answer_right_form }}
                                 <button id="best-right{{ forloop.counter0 }}" type="submit" class="btn btn-lg btn-primary pull-right">
-                                    Правый вариант лучше
+                                    Right is better
                                 </button>
                             </form>
                         </div>
@@ -141,7 +141,7 @@
                                 {% csrf_token %}
                                 {{ form.answer_none_form }}
                                 <button id="best-none{{ forloop.counter0 }}" type="submit" class="btn btn-lg btn-default">
-                                    Не получается выбрать лучший вариант
+                                    None is better
                                 </button>
                             </form>
                         </div>
@@ -173,7 +173,7 @@
 {% else %}
     <div class="container">
         <div>
-            <p>{{ participant.name }}, вы ответили на все вопросы, спасибо!</p>
+            <p>{{ participant.name }}, you've answered all questions!</p>
         </div>
     </div>
 {% endif %}

@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
 import json
 
-from django.contrib import messages
+#from django.contrib import messages
 from django.contrib.admin.views.decorators import staff_member_required
 from django.core.urlresolvers import reverse
 from django.db.models import Q
-from django.http import HttpResponseForbidden, HttpResponse
+from django.http import HttpResponse
 from django.shortcuts import render, redirect
 from django.template.defaultfilters import register
 from VideoPair import settings

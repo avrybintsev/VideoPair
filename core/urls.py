@@ -1,6 +1,7 @@
 from django.conf.urls import patterns, url
 
 urlpatterns = patterns('core.views',
+    url(r'^$', 'lang'),
     url(r'^(?P<lang>(en|ru))/$', 'index'),
     url(r'^(?P<lang>(en|ru))/new', 'new'),
     url(r'^(?P<lang>(en|ru))/inv', 'invalidate'),

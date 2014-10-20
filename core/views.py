@@ -47,6 +47,10 @@ def index(request, lang):
     })
 
 
+def lang(request, template_name='core/lang.html'):
+    return render(request, template_name)
+
+
 def new(request, lang):
     if request.method == 'POST':
         participant_form = ParticipantForm(request.POST)
